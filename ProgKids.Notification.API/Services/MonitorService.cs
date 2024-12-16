@@ -8,7 +8,7 @@ namespace ProgKidsNotifier.Services;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
-public class MonitorService
+public class MonitorService : BackgroundService
 {
     private string _spreadsheetId = "1rQU7dr22i7aS-tEjEdvyCaqhdjTEuol99L5Hzeo9DEc";
     private string _rangeTeachers = "Преподаватели!A1:Q5000"; 
@@ -20,8 +20,11 @@ public class MonitorService
     private const string _botApiToken = "qmcxb6tnai8qfr4ayy5ofej1ko";
     private List<int> _failedToSendIds = [];
     private Dictionary<string, int> _columnsIds = new();
-    
-    public async Task StartService()
+    public static bool ServiceOn = true;
+    private Timer? _timer = null;
+
+
+    protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         try
         {
@@ -41,15 +44,23 @@ public class MonitorService
             _columnsIds.Add("postId", firstRow.IndexOf("PostId"));
             Console.WriteLine($"Found columns : {_columnsIds}");
             Console.WriteLine($"Monitoring started ...");
-              await MonitorSpreadsheetForNewRows();
+            await MonitorSpreadsheetForNewRows();
 
         }
         catch (Exception ex)
         {
+            ServiceOn = false;
             Console.WriteLine($"{DateTime.Now.ToShortDateString()} - {DateTime.Now.ToShortTimeString()} Error: {ex.Message}");
             Console.WriteLine("Hint : Check your spreadsheet column names, whether they match the script");
         }
     }
+
+    public new Task StopAsync(CancellationToken cancellationToken)
+    {
+        this.Dispose();
+        return Task.CompletedTask;
+    }
+    
     private async Task MonitorSpreadsheetForNewRows()
     {
         while (true)
@@ -113,6 +124,7 @@ public class MonitorService
         }
     }
 
+    
     private async Task<string?> SendToMattermost(string messageToSend)
     {
         var client = new HttpClient();
@@ -138,6 +150,34 @@ public class MonitorService
         }
             Console.WriteLine($"Failed to send message to Mattermost. | Repose {await response.Content.ReadAsStringAsync()}");
             return null;
+    }
+    
+   public static async Task<bool> SendUpdateMessage(string postID, string message2)
+    {
+        var client = new HttpClient();
+        var jsonPayload = new
+        {
+            message = message2,
+            channel_id = _channelIdTechNotifications,
+            root_id = postID
+        };
+        var content = new StringContent(
+            Newtonsoft.Json.JsonConvert.SerializeObject(jsonPayload),
+            System.Text.Encoding.UTF8,
+            "application/json");
+
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _botApiToken);
+        
+        var response = await client.PostAsync(_postUrl,  content);
+        
+        if (response.IsSuccessStatusCode)
+        {
+            var postId = JsonConvert.DeserializeObject<MessageRespose>(await response.Content.ReadAsStringAsync());
+            Console.WriteLine($"Message sent to Mattermost successfully. | PostId : {postId}" );
+            return true;
+        }
+        Console.WriteLine($"Failed to send message to Mattermost. | Repose {await response.Content.ReadAsStringAsync()}");
+        return false;  
     }
 
     private async Task UpdatePostIdInGoogleSheet(string postId, int rowIndex, bool managerSheet = false)
@@ -176,4 +216,6 @@ public class MonitorService
         return columnLetter;
     }
     public record MessageRespose(string id);
+
+ 
 }

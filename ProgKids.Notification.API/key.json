@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "studious-pulsar-444912-i6",
+  "private_key_id": "f55b7aca7197292ff28197e3e762da061bda0e20",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEuwIBADANBgkqhkiG9w0BAQEFAASCBKUwggShAgEAAoIBAQCbCUJxwzXED3UV\nZcuBqYoHq13Ef7qEn9uJnZ+8JkGrRvy0blG7SBDtjO++OreU2XV5X3PJNzMJ5mzf\np7I2bi8ZKf/p25dmO4Hj+/EVQD6RGm+9zKmpO5DWNPyBpVljYMH5BBunYUjs0PXd\nb5ZZAdQERQ+taK5mhILkFEH7d0UX8YdIAkfjyf2UuvDtjsNb2reJBTjS9/1xat3u\nvT8+jqdRzVLEKcb7iDxAc7IAsPtMNs/YqYiMjSZR0P5W9pNeMrATSyzhoC2lT0cd\nt/x81g3vqLS0qHfIxuWWJRxK/sFJIRrx3/0AZSpH9iFstIPGGhNUnubHgb51cUOi\n5jQw2m33AgMBAAECggEAMEYxVMgCeVKQ1AFW3UBjtOCkuVdGRh6alt6oSsckwoa/\nkBUbyPN3JeixC+wvlp8hp5HTtU9FSqtfskJ+yNkFPFIqF/Di0xfraYhc+I+BC+CN\n860DFSlxf2mPSHUqgLmznGytibBOq0Kjk/g3ee6KTGwOpiHG0DApq4gtRXZNYtc7\nST9fdiDJmSjoW1lxd6gpVDNSHQ7W/h/visgL1kYYV4EFOiRl0ocnBVrejCwFm2nc\nG++3//2LVJ1AtdErxilCmbG9JZ8rrVdbw9ZxZ+HBMs+peQAptNNFJ+K/UK13azuV\n1yjG1eAS7tvfSpzDCNS7APt8WA2FOkY0rNsTfshAJQKBgQDT6pCx0GNh67UAXja6\nVangppj65EMj0dqPR+72jbtqpT6bz7+7hJa3fCQn5ssxXFr5Jmvlr+dr4T0Ek4SI\nkkoI8W9K9QhcbTJi+UxZfFwpWArUFgwqnr5ew3aW2yHCieZJpO0+ijdmL7zIqbqw\nzL9vGwiZBTWQjVQqK46PwAh0ZQKBgQC7SZbWB8GDQStOCTPVJjXYVDEWlIooo3jt\nb/7YIGHynppVsO7YyjlQK/cflLMw9R2TBLbCWOe/q0Zv4vKQlcOZDRFLgT3FiIne\nUz+YKKy2OZsmzpMietrbUwS9m7X6l5Mr11mGgkkt5NeQCp0SFj3vLcUUfY8PQWj0\nHm7AjLLNKwKBgQCZFC8Tk1HHEUo9itEDxw+grReC3NK3FEdKCw9OYNGKVvWj/e0l\nWsC4qF9Bx5DuBiXdJmj4kRmdryWxoZIySWJblXPsdJZmlaa5IhaJ6bB1WRjxXT/K\npcMklxOaI47+hTip6A5Mh/E+yqsXVKv8PNroOmH6j23DDqRGlhI0OuaglQJ/eLX1\ngf19vBtEzgcgYUE/cy7QdL1ITukOB/snRiWY+8c9sf1X9GJijknH/ZLZ67QQW7Gu\nGZUzyVWbEII11PqyFvNVMlUaezaFpcYCNxAAQXLfjSOXsaF9bd8ULyEtKVaIhLlH\n+mn+wJW+Whh9JCsxv/bAD3Tdv/dore7vcys8EwKBgE7PdHdY1Nf8lLq9++fcCNye\nIigrFqbrUnsD8XKnwNYIpUIRQaqMqrlC+k8F+zWSlZmJX9Zy9kXdorOs9xijtkbU\nGWa5ZKLM3LxFdzKMyFdm3BhxRQ/DBv9DjwVzsyZJR47TMmHVvnfA3xPAYxtqsIVr\ncF1sSwZVUKKrUYXvQKxe\n-----END PRIVATE KEY-----\n",
+  "client_email": "progkids@studious-pulsar-444912-i6.iam.gserviceaccount.com",
+  "client_id": "106973295877565680971",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/progkids%40studious-pulsar-444912-i6.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

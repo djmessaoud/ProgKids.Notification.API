@@ -9,22 +9,22 @@ public class BotPanel : ControllerBase
 {
     
     [HttpPost("[action]")]
-    public async Task<ActionResult<string>> SendUpdateOfPost(string? secret, string? columnName, string? newValue, string? postId)
+    public async Task<ActionResult<string>> SendUpdateOfPost([FromBody]dataDto dto)
     {
         try
         {
-            if (string.IsNullOrEmpty(secret) || string.IsNullOrEmpty(columnName) || string.IsNullOrEmpty(newValue))
+            if (string.IsNullOrEmpty(dto.secret) || string.IsNullOrEmpty(dto.columnName) || string.IsNullOrEmpty(dto.newValue))
                 return BadRequest($"emtpy data");
-            if (secret != "p]QV3G$mn6T0") return BadRequest($"Unauthorized");
+            if (dto.secret != "p]QV3G$mn6T0") return BadRequest($"Unauthorized");
 
-            var firstPart = columnName switch
+            var firstPart = dto.columnName switch
             {
                 "Status" => "**Статус:** ",
                 "Agent" => "*Взял в работу:* ",
                 _ => "ошибка"
             }; 
             
-            var result = await MonitorService.SendUpdateMessage(postId, firstPart + newValue);
+            var result = await MonitorService.SendUpdateMessage(dto.postId, firstPart + dto.newValue);
             return Ok(result.ToString());
         }   
         catch (Exception ex)
@@ -32,4 +32,6 @@ public class BotPanel : ControllerBase
             return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
         }
     }
+
+    public record dataDto(string? secret, string? columnName, string? newValue, string? postId);
 }

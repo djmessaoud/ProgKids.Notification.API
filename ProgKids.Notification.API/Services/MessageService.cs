@@ -12,7 +12,7 @@ public class MessageService
     
     private async Task<string?> SendToMattermost(string messageToSend)
     {
-        var client = new HttpClient();
+        var client = HttpClients.Default;
         var jsonPayload = new
         {
             message = messageToSend,
@@ -22,18 +22,29 @@ public class MessageService
             Newtonsoft.Json.JsonConvert.SerializeObject(jsonPayload),
             System.Text.Encoding.UTF8,
             "application/json");
-
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _botApiToken);
         
         var response = await client.PostAsync(_postUrl,  content);
         
         if (response.IsSuccessStatusCode)
         {
-            var postId = JsonConvert.DeserializeObject<MonitorService.MessageRespose>(await response.Content.ReadAsStringAsync());
+            var postId = await System.Text.Json.JsonSerializer.DeserializeAsync<MonitorService.MessageRespose>(
+                await response.Content.ReadAsStreamAsync());
+          //  var postId = JsonConvert.DeserializeObject<MonitorService.MessageRespose>(await response.Content.ReadAsStringAsync());
             Console.WriteLine($"Message sent to Mattermost successfully. | PostId : {postId}" );
             return postId?.id;
         }
         Console.WriteLine($"Failed to send message to Mattermost. | Repose {await response.Content.ReadAsStringAsync()}");
         return null;
     }
+    
+    private static class HttpClients
+    {
+        public static readonly HttpClient Default = new HttpClient
+        {
+            // Optionally set default headers, timeouts, etc.\
+            DefaultRequestHeaders = { Authorization = new AuthenticationHeaderValue("Bearer", _botApiToken) },
+            Timeout = TimeSpan.FromSeconds(15)
+        };
+    }
+    
 }

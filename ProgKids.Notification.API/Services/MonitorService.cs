@@ -11,15 +11,18 @@ using Google.Apis.Sheets.v4;
 public class MonitorService : BackgroundService
 {
     private string _spreadsheetId = "1rQU7dr22i7aS-tEjEdvyCaqhdjTEuol99L5Hzeo9DEc";
-    private string _rangeTeachers = "Преподаватели!A1:Q5000"; 
-    private string _rangeManagers = "Менеджеры!A1:Q5000"; 
+    private string _rangeTeachers = "Преподаватели!A:R"; 
+    private string _rangeManagers = "'Менеджеры'!A:R"; 
     private int _lastRow = 0;
+    private int _lastRowManagers = 0;
     private const string _channelIdTechSupp = "ecjtcg4t7td1irenib67ggdu7a";
     private const string _channelIdTechNotifications = "4qsc9pn6wtrp3nf4usn9z33ryc";
     private const string _postUrl = "https://msg.progkids.com/api/v4/posts";
     private const string _botApiToken = "qmcxb6tnai8qfr4ayy5ofej1ko";
     private List<int> _failedToSendIds = [];
+    private List<int> _failedToSendIdsManagers = [];
     private Dictionary<string, int> _columnsIds = new();
+    private Dictionary<string, int> _columnsIdsManagers = new();
     public static bool ServiceOn = true;
     private Timer? _timer = null;
 
@@ -30,10 +33,13 @@ public class MonitorService : BackgroundService
         {
             Console.WriteLine("Starting service...");
             Console.WriteLine("Getting rows...");
-            var rows = await GetRowsAsync();
+            var rows = await GetRowsAsync(teachers:true);
+            var rowsManagers = await GetRowsAsync(teachers: false);
             Console.WriteLine($"Initial rows found: {rows.Count}");
             _lastRow = rows.Count;
+            _lastRowManagers = rowsManagers.Count;
             var firstRow = rows.First();
+            var firstRowManagers = rowsManagers.First();
             Console.WriteLine($"Getting columns ids");
             _columnsIds.Add("ticketId", firstRow.IndexOf("Id заявки"));
             _columnsIds.Add("problem", firstRow.IndexOf("Кратко опишите проблему"));
@@ -44,8 +50,20 @@ public class MonitorService : BackgroundService
             _columnsIds.Add("postId", firstRow.IndexOf("PostId"));
             _columnsIds.Add("contactDate", firstRow.IndexOf("Дата связи с учеником"));
             _columnsIds.Add("contactTime", firstRow.IndexOf("Время связи с учеником"));
-            Console.WriteLine($"Found columns : {_columnsIds}");
+            // Managers
+            _columnsIdsManagers.Add("ticketId", firstRowManagers.IndexOf("Id заявки"));
+            _columnsIdsManagers.Add("problem", firstRowManagers.IndexOf("Кратко опишите проблему"));
+            _columnsIdsManagers.Add("link", firstRowManagers.IndexOf("Ссылка на сделку в amocrm"));
+            _columnsIdsManagers.Add("teacherToggle", firstRowManagers.IndexOf("Укажите ваш ник в Mattermost с @"));
+            _columnsIdsManagers.Add("status", firstRowManagers.IndexOf("Статус"));
+            _columnsIdsManagers.Add("agent", firstRowManagers.IndexOf("Кто обрабатывает задачу"));
+            _columnsIdsManagers.Add("postId", firstRowManagers.IndexOf("PostId"));
+            _columnsIdsManagers.Add("contactDate", firstRowManagers.IndexOf("Дата связи с учеником"));
+            _columnsIdsManagers.Add("contactTime", firstRowManagers.IndexOf("Время связи с учеником"));
+            Console.WriteLine($"Found columns : {_columnsIds.Count} ");
+            Console.WriteLine($"Found columns managers : {_columnsIdsManagers.Count}");
             Console.WriteLine($"Monitoring started ...");
+            ServiceOn = true;
             await MonitorSpreadsheetForNewRows();
 
         }
@@ -62,15 +80,19 @@ public class MonitorService : BackgroundService
     {
         while (true)
         {
-            Console.WriteLine($"Monitoring .. last row ID = {_lastRow}");
-            var rows = await GetRowsAsync();
+            Console.WriteLine($"[Teacher] Monitoring .. last row ID = {_lastRow}");
+            Console.WriteLine($"[Manager] Monitoring .. last row ID = {_lastRowManagers}");
+            var rows = await GetRowsAsync(teachers: true);
+            var rowsManagers = await GetRowsAsync(teachers: false);
             var rowsCount = rows.Count;
+            var rowsCountManagers = rowsManagers.Count;
+            //Teachers 
             if (rowsCount > _lastRow)
             {
                 for (int i = _lastRow + 1; i <= rowsCount; i++)
                 {
                     var currentNewRow = rows[i-1];
-                    if (!string.IsNullOrEmpty(currentNewRow[_columnsIds["postId"]]?.ToString()))
+                    if ((currentNewRow.Count > _columnsIds["postId"])  && (!string.IsNullOrEmpty(currentNewRow[_columnsIds["postId"]]?.ToString())))
                     {
                         _lastRow = i;
                         continue;
@@ -83,16 +105,18 @@ public class MonitorService : BackgroundService
                     sb.AppendLine($"**Преподаватель: ** {currentNewRow[_columnsIds["teacherToggle"]]}");
                     sb.AppendLine($"**Описание проблемы: ** {currentNewRow[_columnsIds["problem"]]}");
                     sb.AppendLine($"**почта ученика: ** {currentNewRow[_columnsIds["email"]]}");
-                    if (!string.IsNullOrWhiteSpace(currentNewRow[_columnsIds["contactDate"]].ToString()))
-                        sb.AppendLine($"** Дата связи с учеником ** : {currentNewRow[_columnsIds["contactDate"]]}");
-                    if (!string.IsNullOrWhiteSpace(currentNewRow[_columnsIds["contactTime"]].ToString()))
-                        sb.AppendLine($"** Время связи с учеником ** : {currentNewRow[_columnsIds["contactTime"]]}");
+                    if ((currentNewRow.Count > _columnsIds["contactDate"]) 
+                        && (!string.IsNullOrWhiteSpace(currentNewRow[_columnsIds["contactDate"]].ToString())))
+                        sb.AppendLine($"** Дата связи с учеником ** : {currentNewRow[_columnsIds["contactDate"]]}"); 
+                    if ((currentNewRow.Count > _columnsIds["contactTime"]) 
+                        && (!string.IsNullOrWhiteSpace(currentNewRow[_columnsIds["contactTime"]].ToString())))
+                        sb.AppendLine($"** Время связи с учеником ** : {currentNewRow[_columnsIds["contactTime"]]}"); 
                     sb.AppendLine("@support");
                     sb.AppendLine("++++++++");
                     if (await SendToMattermost(sb.ToString()) is { } postId)
                     {
                         _lastRow = i;
-                        Console.WriteLine($"new ticket : PostID = {postId}");
+                        Console.WriteLine($"[Teacher] new ticket : PostID = {postId}");
                         await UpdatePostIdInGoogleSheet(postId, i-1);
                     }
                     else
@@ -104,23 +128,73 @@ public class MonitorService : BackgroundService
             }
             else if (_lastRow > rowsCount)
             {
-                Console.WriteLine($"Rows deleted, updating last row  to {rowsCount}");
+                Console.WriteLine($"[Teachers] Rows deleted, updating last row  to {rowsCount}");
                 _lastRow = rowsCount;
             }
             else
             {
-                Console.WriteLine("No new row.");
+                Console.WriteLine("[Teachers] No new row.");
             }
+            // MANAGERS ---------------------
+            if (rowsCountManagers > _lastRowManagers)
+            {
+                for (int i = _lastRowManagers + 1; i <= rowsCountManagers; i++)
+                {
+                    var currentNewRow = rowsManagers[i-1];
+                    if ((currentNewRow.Count > _columnsIdsManagers["postId"])  && (!string.IsNullOrEmpty(currentNewRow[_columnsIdsManagers["postId"]]?.ToString())))
+                    {
+                        _lastRow = i;
+                        continue;
+                    }
+                    
+                    var sb = new StringBuilder();
+                    sb.AppendLine("++++++++");
+                    sb.Append("** Новый тикет  **\n");
+                    sb.AppendLine($"**ID тикета: ** {currentNewRow[_columnsIdsManagers["ticketId"]]}");
+                    sb.AppendLine($"**Менеджер: ** {currentNewRow[_columnsIdsManagers["teacherToggle"]]}");
+                    sb.AppendLine($"**Описание проблемы: ** {currentNewRow[_columnsIdsManagers["problem"]]}");
+                    sb.AppendLine($"**Ссылка на AmoCRM: ** {currentNewRow[_columnsIdsManagers["link"]]}");
+                    if ((currentNewRow.Count > _columnsIdsManagers["contactDate"]) 
+                        && (!string.IsNullOrWhiteSpace(currentNewRow[_columnsIdsManagers["contactDate"]].ToString())))
+                        sb.AppendLine($"** Дата связи с учеником ** : {currentNewRow[_columnsIdsManagers["contactDate"]]}"); 
+                    if ((currentNewRow.Count > _columnsIds["contactTime"]) 
+                        && (!string.IsNullOrWhiteSpace(currentNewRow[_columnsIdsManagers["contactTime"]].ToString())))
+                        sb.AppendLine($"** Время связи с учеником ** : {currentNewRow[_columnsIdsManagers["contactTime"]]}"); 
+                    sb.AppendLine("@support");
+                    sb.AppendLine("++++++++");
+                    if (await SendToMattermost(sb.ToString()) is { } postId)
+                    {
+                        _lastRow = i;
+                        Console.WriteLine($"[Manager] new ticket : PostID = {postId}");
+                        await UpdatePostIdInGoogleSheet(postId, i-1, managerSheet:true);
+                    }
+                    else
+                    {
+                        if (!_failedToSendIdsManagers.Contains(i))
+                            _failedToSendIdsManagers.Add(i);
+                    }
+                }
+            }
+            else if (_lastRowManagers > rowsCount)
+            {
+                Console.WriteLine($"[Manager] Rows deleted, updating last row  to {rowsCount}");
+                _lastRow = rowsCount;
+            }
+            else
+            {
+                Console.WriteLine("[Manager] No new row.");
+            }
+            
             await Task.Delay(TimeSpan.FromSeconds(10));
         }
     }
 
-    private async Task<IList<IList<object>>> GetRowsAsync()
+    private async Task<IList<IList<object?>>> GetRowsAsync(bool teachers)
     {
         try
         {
             var service = await GoogleSheetService.GetSheetsService();
-            var request = service.Spreadsheets.Values.Get(_spreadsheetId, _rangeTeachers);
+            var request = service.Spreadsheets.Values.Get(_spreadsheetId, teachers? _rangeTeachers : _rangeManagers);
             var response = await request.ExecuteAsync();
             return response.Values;
         }
@@ -193,11 +267,11 @@ public class MonitorService : BackgroundService
         {
             
             var rangeTeachers = $"Преподаватели!{GetColumnLetter(_columnsIds["postId"])}{rowIndex + 1}";
-            var rangeManagers = $"Менеджеры!{GetColumnLetter(_columnsIds["postId"])}{rowIndex + 1}";
+            var rangeManagers = $"Менеджеры!{GetColumnLetter(_columnsIdsManagers["postId"])}{rowIndex + 1}";
             var service = await GoogleSheetService.GetSheetsService(); 
             var values = new List<IList<object>> { new List<object> { postId } };
             var body = new ValueRange { Values = values };
-
+            
             var updateRequest = service.Spreadsheets.Values.Update(body, _spreadsheetId, (managerSheet)? rangeManagers : rangeTeachers);
             updateRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.RAW;
         

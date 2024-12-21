@@ -70,8 +70,8 @@ public class MonitorService : BackgroundService
         catch (Exception ex)
         {
             ServiceOn = false;
-            Console.WriteLine($"{DateTime.Now.ToShortDateString()} - {DateTime.Now.ToShortTimeString()} Error: {ex.Message}");
-            Console.WriteLine("Hint : Check your spreadsheet column names, whether they match the script");
+           // Console.WriteLine($"{DateTime.Now.ToShortDateString()} - {DateTime.Now.ToShortTimeString()} Error: {ex.Message}");
+          //  Console.WriteLine("Hint : Check your spreadsheet column names, whether they match the script");
         }
     }
     
@@ -80,8 +80,8 @@ public class MonitorService : BackgroundService
     {
         while (true)
         {
-            Console.WriteLine($"[Teacher] Monitoring .. last row ID = {_lastRow}");
-            Console.WriteLine($"[Manager] Monitoring .. last row ID = {_lastRowManagers}");
+           // Console.WriteLine($"[Teacher] Monitoring .. last row ID = {_lastRow}");
+           // Console.WriteLine($"[Manager] Monitoring .. last row ID = {_lastRowManagers}");
             var rows = await GetRowsAsync(teachers: true);
             var rowsManagers = await GetRowsAsync(teachers: false);
             var rowsCount = rows.Count;
@@ -116,7 +116,7 @@ public class MonitorService : BackgroundService
                     if (await SendToMattermost(sb.ToString()) is { } postId)
                     {
                         _lastRow = i;
-                        Console.WriteLine($"[Teacher] new ticket : PostID = {postId}");
+                      //  Console.WriteLine($"[Teacher] new ticket : PostID = {postId}");
                         await UpdatePostIdInGoogleSheet(postId, i-1);
                     }
                     else
@@ -128,12 +128,12 @@ public class MonitorService : BackgroundService
             }
             else if (_lastRow > rowsCount)
             {
-                Console.WriteLine($"[Teachers] Rows deleted, updating last row  to {rowsCount}");
+              //  Console.WriteLine($"[Teachers] Rows deleted, updating last row  to {rowsCount}");
                 _lastRow = rowsCount;
             }
             else
             {
-                Console.WriteLine("[Teachers] No new row.");
+              //  Console.WriteLine("[Teachers] No new row.");
             }
             // MANAGERS ---------------------
             if (rowsCountManagers > _lastRowManagers)
@@ -177,15 +177,15 @@ public class MonitorService : BackgroundService
             }
             else if (_lastRowManagers > rowsCount)
             {
-                Console.WriteLine($"[Manager] Rows deleted, updating last row  to {rowsCount}");
+              //  Console.WriteLine($"[Manager] Rows deleted, updating last row  to {rowsCount}");
                 _lastRow = rowsCount;
             }
             else
             {
-                Console.WriteLine("[Manager] No new row.");
+              //  Console.WriteLine("[Manager] No new row.");
             }
             
-            await Task.Delay(TimeSpan.FromSeconds(10));
+            await Task.Delay(TimeSpan.FromSeconds(30));
         }
     }
 
@@ -229,7 +229,7 @@ public class MonitorService : BackgroundService
             Console.WriteLine($"Message sent to Mattermost successfully. | PostId : {postId}" );
             return postId?.id;
         }
-            Console.WriteLine($"Failed to send message to Mattermost. | Repose {await response.Content.ReadAsStringAsync()}");
+        //    Console.WriteLine($"Failed to send message to Mattermost. | Repose {await response.Content.ReadAsStringAsync()}");
             return null;
     }
     
@@ -257,7 +257,7 @@ public class MonitorService : BackgroundService
             Console.WriteLine($"Message sent to Mattermost successfully. | PostId : {postId}" );
             return true;
         }
-        Console.WriteLine($"Failed to send message to Mattermost. | Repose {await response.Content.ReadAsStringAsync()}");
+      //  Console.WriteLine($"Failed to send message to Mattermost. | Repose {await response.Content.ReadAsStringAsync()}");
         return false;  
     }
 
@@ -276,11 +276,11 @@ public class MonitorService : BackgroundService
             updateRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.RAW;
         
             var updateResponse = await updateRequest.ExecuteAsync();
-            Console.WriteLine($"Successfully updated PostId in Google Sheets for row {rowIndex + 1}: {postId}");
+          //  Console.WriteLine($"Successfully updated PostId in Google Sheets for row {rowIndex + 1}: {postId}");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error updating PostId in Google Sheets: {ex.Message}");
+           // Console.WriteLine($"Error updating PostId in Google Sheets: {ex.Message}");
         }
     }
 

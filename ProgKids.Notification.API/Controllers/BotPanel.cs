@@ -7,7 +7,12 @@ namespace ProgKids.Notification.API.Controllers;
 [Route("[controller]")]
 public class BotPanel : ControllerBase
 {
-    
+    private IServiceProvider _serviceProvider;
+
+    public BotPanel(IServiceProvider serviceProvider)
+    {
+        _serviceProvider = serviceProvider;
+    }
     [HttpPost("[action]")]
     public async Task<ActionResult<string>> SendUpdateOfPost([FromBody]dataDto dto)
     {
@@ -20,7 +25,11 @@ public class BotPanel : ControllerBase
             var firstPart = dto.columnName switch
             {
                 "Status" => "**Статус:** ",
-                "Agent" => "*Взял в работу:* ",
+                "Agent" => "** Взял в работу: ** ",
+                "contactDate" => "** Дата связи с учеником: ** ",
+                "contactTime" => "** Время связи с учеником **",
+                "Retries" => "** Попытка связи с клиентом:  **",
+                "Result" => "** Результат выполнения: **",
                 _ => "ошибка"
             }; 
             
@@ -33,5 +42,10 @@ public class BotPanel : ControllerBase
         }
     }
 
+    [HttpGet("/status")]
+
+    public async Task<ActionResult<string>> StatusOfBot()
+        => (MonitorService.ServiceOn)? "Сервис на работе" : "Сервис не на работе, напишите разрабочику";
+    
     public record dataDto(string? secret, string? columnName, string? newValue, string? postId);
 }

@@ -42,6 +42,8 @@ public class MonitorService : BackgroundService
             _columnsIds.Add("status", firstRow.IndexOf("Статус"));
             _columnsIds.Add("agent", firstRow.IndexOf("Кто обрабатывает задачу"));
             _columnsIds.Add("postId", firstRow.IndexOf("PostId"));
+            _columnsIds.Add("contactDate", firstRow.IndexOf("Дата связи с учеником"));
+            _columnsIds.Add("contactTime", firstRow.IndexOf("Время связи с учеником"));
             Console.WriteLine($"Found columns : {_columnsIds}");
             Console.WriteLine($"Monitoring started ...");
             await MonitorSpreadsheetForNewRows();
@@ -54,12 +56,7 @@ public class MonitorService : BackgroundService
             Console.WriteLine("Hint : Check your spreadsheet column names, whether they match the script");
         }
     }
-
-    public new Task StopAsync(CancellationToken cancellationToken)
-    {
-        this.Dispose();
-        return Task.CompletedTask;
-    }
+    
     
     private async Task MonitorSpreadsheetForNewRows()
     {
@@ -73,6 +70,12 @@ public class MonitorService : BackgroundService
                 for (int i = _lastRow + 1; i <= rowsCount; i++)
                 {
                     var currentNewRow = rows[i-1];
+                    if (!string.IsNullOrEmpty(currentNewRow[_columnsIds["postId"]]?.ToString()))
+                    {
+                        _lastRow = i;
+                        continue;
+                    }
+                    
                     var sb = new StringBuilder();
                     sb.AppendLine("++++++++");
                     sb.Append("** Новый тикет  **\n");
@@ -80,6 +83,10 @@ public class MonitorService : BackgroundService
                     sb.AppendLine($"**Преподаватель: ** {currentNewRow[_columnsIds["teacherToggle"]]}");
                     sb.AppendLine($"**Описание проблемы: ** {currentNewRow[_columnsIds["problem"]]}");
                     sb.AppendLine($"**почта ученика: ** {currentNewRow[_columnsIds["email"]]}");
+                    if (!string.IsNullOrWhiteSpace(currentNewRow[_columnsIds["contactDate"]].ToString()))
+                        sb.AppendLine($"** Дата связи с учеником ** : {currentNewRow[_columnsIds["contactDate"]]}");
+                    if (!string.IsNullOrWhiteSpace(currentNewRow[_columnsIds["contactTime"]].ToString()))
+                        sb.AppendLine($"** Время связи с учеником ** : {currentNewRow[_columnsIds["contactTime"]]}");
                     sb.AppendLine("@support");
                     sb.AppendLine("++++++++");
                     if (await SendToMattermost(sb.ToString()) is { } postId)
@@ -217,5 +224,9 @@ public class MonitorService : BackgroundService
     }
     public record MessageRespose(string id);
 
- 
+
+    public void RestartTask()
+    {
+        throw new NotImplementedException();
+    }
 }

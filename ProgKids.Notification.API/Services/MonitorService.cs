@@ -13,8 +13,8 @@ using Google.Apis.Sheets.v4;
 public class MonitorService : BackgroundService
 {
     private string _spreadsheetId = "1rQU7dr22i7aS-tEjEdvyCaqhdjTEuol99L5Hzeo9DEc";
-    private string _rangeTeachers = "Преподаватели!A:R";
-    private string _rangeManagers = "Менеджеры!A:R";
+    private string _rangeTeachers = "Преподаватели!A:W";
+    private string _rangeManagers = "Менеджеры!A:W";
     private int _lastRow = 0;
     private int _lastRowManagers = 0;
     private const string _channelIdTechSupp = "ecjtcg4t7td1irenib67ggdu7a";

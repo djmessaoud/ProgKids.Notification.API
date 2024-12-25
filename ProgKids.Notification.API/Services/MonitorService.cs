@@ -18,6 +18,7 @@ public class MonitorService : BackgroundService
     private int _lastRow = 0;
     private int _lastRowManagers = 0;
     private const string _channelIdTechSupp = "ecjtcg4t7td1irenib67ggdu7a";
+    private const string _channelIdManagers = "14jj87m9ebf53drekbx17qizsr";
     private const string _channelIdTechNotifications = "4qsc9pn6wtrp3nf4usn9z33ryc";
     private const string _postUrl = "https://msg.progkids.com/api/v4/posts";
     private const string _botApiToken = "qmcxb6tnai8qfr4ayy5ofej1ko";
@@ -169,7 +170,7 @@ public class MonitorService : BackgroundService
                             $"** Время связи с учеником ** : {currentNewRow[_columnsIdsManagers["contactTime"]]}");
                     sb.AppendLine("@support");
                     sb.AppendLine("++++++++");
-                    if (await SendToMattermost(sb.ToString()) is { } postId)
+                    if (await SendToMattermost(sb.ToString(), managersChannel: true) is { } postId)
                     {
                         _lastRowManagers = i;
                   //      Console.WriteLine($"[Manager] new ticket : PostID = {postId}");
@@ -213,14 +214,14 @@ public class MonitorService : BackgroundService
     }
 
 
-    private async Task<string?> SendToMattermost(string messageToSend)
+    private async Task<string?> SendToMattermost(string messageToSend, bool managersChannel = false)
     {
         var client = HttpClients.Default;
         
         var jsonPayload = new
         {
             message = messageToSend,
-            channel_id = _channelIdTechNotifications
+            channel_id = (managersChannel)? _channelIdManagers : _channelIdTechNotifications,
         };
         var content = new StringContent(
             Newtonsoft.Json.JsonConvert.SerializeObject(jsonPayload),

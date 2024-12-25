@@ -33,7 +33,7 @@ public class BotPanel : ControllerBase
                 _ => "ошибка"
             }; 
             
-            var result = await MonitorService.SendUpdateMessage(dto.postId, firstPart + dto.newValue);
+            var result = await MonitorService.SendUpdateMessage(dto.postId, firstPart + dto.newValue,managersChannel: dto.managersChat);
             return Ok(result.ToString());
         }   
         catch (Exception ex)
@@ -47,5 +47,5 @@ public class BotPanel : ControllerBase
     public async Task<ActionResult<string>> StatusOfBot()
         => (MonitorService.ServiceOn)? "Сервис на работе" : "Сервис не на работе, напишите разрабочику";
     
-    public record dataDto(string? secret, string? columnName, string? newValue, string? postId);
+    public record dataDto(string? secret, string? columnName, string? newValue, string? postId, bool managersChat = false);
 }

@@ -242,13 +242,13 @@ public class MonitorService : BackgroundService
         return null;
     }
 
-    public static async Task<bool> SendUpdateMessage(string postID, string message2)
+    public static async Task<bool> SendUpdateMessage(string postID, string message2, bool managersChannel = false)
     {
         var client = HttpClients.Default;
         var jsonPayload = new
         {
             message = message2,
-            channel_id = _channelIdTechNotifications,
+            channel_id =(managersChannel)? _channelIdManagers: _channelIdTechNotifications,
             root_id = postID
         };
         var content = new StringContent(

@@ -53,11 +53,13 @@ public class MonitorService : BackgroundService
             _columnsIds.Add("postId", firstRow.IndexOf("PostId"));
             _columnsIds.Add("contactDate", firstRow.IndexOf("Дата связи с учеником"));
             _columnsIds.Add("contactTime", firstRow.IndexOf("Время связи с учеником"));
+            _columnsIds.Add("lessonType", firstRow.IndexOf("Какое это занятие?"));
             // Managers
             _columnsIdsManagers.Add("ticketId", firstRowManagers.IndexOf("Id заявки"));
             _columnsIdsManagers.Add("problem", firstRowManagers.IndexOf("Кратко опишите проблему"));
             _columnsIdsManagers.Add("link", firstRowManagers.IndexOf("Ссылка на сделку в amocrm"));
             _columnsIdsManagers.Add("teacherToggle", firstRowManagers.IndexOf("Укажите ваш ник в Mattermost с @"));
+            _columnsIdsManagers.Add("email", firstRowManagers.IndexOf("Электронный адрес ученика"));
             _columnsIdsManagers.Add("status", firstRowManagers.IndexOf("Статус"));
             _columnsIdsManagers.Add("agent", firstRowManagers.IndexOf("Кто обрабатывает задачу"));
             _columnsIdsManagers.Add("postId", firstRowManagers.IndexOf("PostId"));
@@ -109,6 +111,7 @@ public class MonitorService : BackgroundService
                     sb.AppendLine($"**Преподаватель: ** {currentNewRow[_columnsIds["teacherToggle"]]}");
                     sb.AppendLine($"**Описание проблемы: ** {currentNewRow[_columnsIds["problem"]]}");
                     sb.AppendLine($"**почта ученика: ** {currentNewRow[_columnsIds["email"]]}");
+                    sb.AppendLine($"**Тип занятие: ** {currentNewRow[_columnsIds["lessonType"]]}");
                     if ((currentNewRow.Count > _columnsIds["contactDate"])
                         && (!string.IsNullOrWhiteSpace(currentNewRow[_columnsIds["contactDate"]].ToString())))
                         sb.AppendLine($"** Дата связи с учеником ** : {currentNewRow[_columnsIds["contactDate"]]}");
@@ -167,7 +170,11 @@ public class MonitorService : BackgroundService
                     if ((currentNewRow.Count > _columnsIdsManagers["contactTime"])
                         && (!string.IsNullOrWhiteSpace(currentNewRow[_columnsIdsManagers["contactTime"]].ToString())))
                         sb.AppendLine(
-                            $"** Время связи с учеником ** : {currentNewRow[_columnsIdsManagers["contactTime"]]}");
+                            $"** Время связи с учеником ** : {currentNewRow[_columnsIdsManagers["contactTime"]]}");         
+                    if ((currentNewRow.Count > _columnsIdsManagers["email"])
+                        && (!string.IsNullOrWhiteSpace(currentNewRow[_columnsIdsManagers["email"]].ToString())))
+                        sb.AppendLine(
+                            $"** Почта ** : {currentNewRow[_columnsIdsManagers["email"]]}");
                     sb.AppendLine("@support");
                     sb.AppendLine("++++++++");
                     if (await SendToMattermost(sb.ToString(), managersChannel: true) is { } postId)

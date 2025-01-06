@@ -228,7 +228,7 @@ public class MonitorService : BackgroundService
         var jsonPayload = new
         {
             message = messageToSend,
-            channel_id = (managersChannel)? _channelIdManagers : _channelIdTechNotifications,
+            channel_id = (managersChannel)? _channelIdManagers : _channelIdTechSupp,
         };
         var content = new StringContent(
             Newtonsoft.Json.JsonConvert.SerializeObject(jsonPayload),
@@ -255,7 +255,7 @@ public class MonitorService : BackgroundService
         var jsonPayload = new
         {
             message = message2,
-            channel_id =(managersChannel)? _channelIdManagers: _channelIdTechNotifications,
+            channel_id =(managersChannel)? _channelIdManagers: _channelIdTechSupp,
             root_id = postID
         };
         var content = new StringContent(

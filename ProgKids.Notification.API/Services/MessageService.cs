@@ -16,7 +16,7 @@ public class MessageService
         var jsonPayload = new
         {
             message = messageToSend,
-            channel_id = _channelIdTechNotifications
+            channel_id = _channelIdTechSupp
         };
         var content = new StringContent(
             Newtonsoft.Json.JsonConvert.SerializeObject(jsonPayload),

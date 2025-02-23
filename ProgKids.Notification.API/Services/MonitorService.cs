@@ -49,10 +49,10 @@ public class MonitorService : BackgroundService
             _columnsIds.Add("email", firstRow.IndexOf("Электронный адрес ученика"));
             _columnsIds.Add("teacherToggle", firstRow.IndexOf("Укажите ваш ник в Mattermost с @"));
             _columnsIds.Add("status", firstRow.IndexOf("Статус"));
-            _columnsIds.Add("agent", firstRow.IndexOf("Кто обрабатывает задачу"));
+            _columnsIds.Add("agent", firstRow.IndexOf("Кто обрабатывает тикет"));
             _columnsIds.Add("postId", firstRow.IndexOf("PostId"));
-            _columnsIds.Add("contactDate", firstRow.IndexOf("Дата связи с учеником"));
-            _columnsIds.Add("contactTime", firstRow.IndexOf("Время связи с учеником"));
+            _columnsIds.Add("contactDate", firstRow.IndexOf("Дата связи с учеником в формате ДД.ММ.ГГ"));
+            _columnsIds.Add("contactTime", firstRow.IndexOf("Время связи с учеником в формате 00:00"));
             _columnsIds.Add("lessonType", firstRow.IndexOf("Какое это занятие?"));
             // Managers
             _columnsIdsManagers.Add("ticketId", firstRowManagers.IndexOf("Id заявки"));
@@ -61,10 +61,10 @@ public class MonitorService : BackgroundService
             _columnsIdsManagers.Add("teacherToggle", firstRowManagers.IndexOf("Укажите ваш ник в Mattermost с @"));
             _columnsIdsManagers.Add("email", firstRowManagers.IndexOf("Электронный адрес ученика"));
             _columnsIdsManagers.Add("status", firstRowManagers.IndexOf("Статус"));
-            _columnsIdsManagers.Add("agent", firstRowManagers.IndexOf("Кто обрабатывает задачу"));
+            _columnsIdsManagers.Add("agent", firstRowManagers.IndexOf("Кто обрабатывает тикет"));
             _columnsIdsManagers.Add("postId", firstRowManagers.IndexOf("PostId"));
-            _columnsIdsManagers.Add("contactDate", firstRowManagers.IndexOf("Дата связи с учеником"));
-            _columnsIdsManagers.Add("contactTime", firstRowManagers.IndexOf("Время связи с учеником"));
+            _columnsIdsManagers.Add("contactDate", firstRowManagers.IndexOf("Дата связи с учеником в формате ДД.ММ.ГГ"));
+            _columnsIdsManagers.Add("contactTime", firstRowManagers.IndexOf("Время связи с учеником в формате 00:00"));
             Console.WriteLine($"Found columns : {_columnsIds.Count} ");
             Console.WriteLine($"Found columns managers : {_columnsIdsManagers.Count}");
             Console.WriteLine($"Monitoring started ...");
@@ -103,7 +103,6 @@ public class MonitorService : BackgroundService
                         _lastRow = i;
                         continue;
                     }
-
                     var sb = new StringBuilder();
                     sb.AppendLine("++++++++");
                     sb.Append("** Новый тикет  **\n");
